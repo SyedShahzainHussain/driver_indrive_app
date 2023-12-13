@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "994038335980",
+    "project_id": "uber-indrive-app",
+    "storage_bucket": "uber-indrive-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:994038335980:android:219026054edcb08dd318c9",
+        "android_client_info": {
+          "package_name": "com.example.uber_clone_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCi1kJuEPLCWI9C4pmk_h7RYm33KTOENVU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
