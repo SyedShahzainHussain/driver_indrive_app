@@ -48,6 +48,7 @@ dependencies:
   geocoding: ^2.1.1
   flutter_polyline_points: ^2.0.0
   flutter_geofire: ^2.0.3
+  firebase_messaging: ^14.7.9
 dev_dependencies:
   flutter_test:
     sdk: flutter

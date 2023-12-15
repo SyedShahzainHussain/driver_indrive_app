@@ -11,6 +11,7 @@ import 'package:uber_clone_app/extension/screenWidthHeight/mediaquery.dart';
 import 'package:uber_clone_app/resources/app_colors.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:uber_clone_app/view/global/global.dart';
+import 'package:uber_clone_app/view/push_notification/push_notification.dart';
 
 class HomeTapPage extends StatefulWidget {
   const HomeTapPage({super.key});
@@ -38,8 +39,101 @@ class _HomeTapPageState extends State<HomeTapPage> {
   void initState() {
     super.initState();
     checkIfLocationPermissionAllowes();
+    readCurrentDriverInformation();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Stack(
+          children: [
+            GoogleMap(
+              initialCameraPosition: _kGooglePlex,
+              mapType: MapType.normal,
+              myLocationEnabled: true,
+              onMapCreated: (GoogleMapController googleMapController) {
+                _googleMapController.complete(googleMapController);
+                newGoogleMapController = googleMapController;
+                blackThemeGoogleMap();
+                locateUserPositioned();
+              },
+            ),
+            // ! ui for online offline driver
+
+            statusText == "Now Offline"
+                ? Container(
+                    height: context.screenHeight,
+                    width: context.screenWidth,
+                    color: Colors.black87,
+                  )
+                : Container(),
+
+            Positioned(
+              top:
+                  statusText == "Now Offline" ? context.screenHeight * .45 : 25,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FilledButton.tonal(
+                      style:
+                          FilledButton.styleFrom(backgroundColor: statusColor),
+                      onPressed: () async {
+                        if (isDriverActive != true) {
+                          await driverIsOnlineNow();
+                          await changeDriverLiveLocation();
+                          setState(() {
+                            statusText = "Now Online";
+                            statusColor = Colors.black87;
+                            isDriverActive = true;
+                          });
+                          Fluttertoast.showToast(msg: "you are Online now");
+                        } else {
+                          isDriverOffline();
+                          setState(() {
+                            statusText = "Now Offline";
+                            statusColor = Colors.grey;
+                            isDriverActive = false;
+                          });
+                          Fluttertoast.showToast(msg: "you are Offline now");
+                        }
+                      },
+                      child: statusText == "Now Offline"
+                          ? Text(
+                              statusText!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.whiteColor,
+                                  ),
+                            )
+                          : const Icon(
+                              Icons.phonelink_ring,
+                              color: AppColors.whiteColor,
+                              size: 26,
+                            ))
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ! read information from notification
+  void readCurrentDriverInformation() async {
+    PushNotificationSystem pushNotificationSystem = PushNotificationSystem();
+    pushNotificationSystem.generateToken();
+    pushNotificationSystem.iitilazeCloudMessaging();
+  }
+
+  // ! black theme map
   void blackThemeGoogleMap() {
     newGoogleMapController!.setMapStyle('''
                     [
@@ -206,6 +300,7 @@ class _HomeTapPageState extends State<HomeTapPage> {
                 ''');
   }
 
+  // ! check  drive location permission if success then get the drive current location
   void checkIfLocationPermissionAllowes() async {
     _locationPermission = await Geolocator.requestPermission();
     if (_locationPermission == LocationPermission.denied) {
@@ -214,12 +309,15 @@ class _HomeTapPageState extends State<HomeTapPage> {
       locateUserPositioned();
     }
   }
+  // ! drivers current location
 
   void locateUserPositioned() async {
     Position cPosition = await Geolocator.getCurrentPosition();
     driverCurrentPositioned = cPosition;
     LatLng latLngPositioned = LatLng(
-        driverCurrentPositioned!.latitude, driverCurrentPositioned!.longitude);
+      driverCurrentPositioned!.latitude,
+      driverCurrentPositioned!.longitude,
+    );
 
     newGoogleMapController!.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: latLngPositioned, zoom: 14)));
@@ -228,91 +326,7 @@ class _HomeTapPageState extends State<HomeTapPage> {
         driverCurrentPositioned!, context);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            GoogleMap(
-              initialCameraPosition: _kGooglePlex,
-              mapType: MapType.normal,
-              myLocationEnabled: true,
-              onMapCreated: (GoogleMapController googleMapController) {
-                _googleMapController.complete(googleMapController);
-                newGoogleMapController = googleMapController;
-                blackThemeGoogleMap();
-                locateUserPositioned();
-              },
-            ),
-            // ! ui for online offline driver
-
-            statusText == "Now Offline"
-                ? Container(
-                    height: context.screenHeight,
-                    width: context.screenWidth,
-                    color: Colors.black87,
-                  )
-                : Container(),
-
-            Positioned(
-              top:
-                  statusText == "Now Offline" ? context.screenHeight * .45 : 25,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  FilledButton.tonal(
-                      style:
-                          FilledButton.styleFrom(backgroundColor: statusColor),
-                      onPressed: () async {
-                        if (isDriverActive != true) {
-                          await driverIsOnlineNow();
-                          await changeDriverLiveLocation();
-                          setState(() {
-                            statusText = "Now Online";
-                            statusColor = Colors.black87;
-                            isDriverActive = true;
-                          });
-                          Fluttertoast.showToast(msg: "you are Online now");
-                        } else {
-                          isDriverOffline();
-                          setState(() {
-                            statusText = "Now Offline";
-                            statusColor = Colors.grey;
-                            isDriverActive = false;
-                          });
-                          Fluttertoast.showToast(msg: "you are Offline now");
-                        }
-                      },
-                      child: statusText == "Now Offline"
-                          ? Text(
-                              statusText!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium!
-                                  .copyWith(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.whiteColor,
-                                  ),
-                            )
-                          : const Icon(
-                              Icons.phonelink_ring,
-                              color: AppColors.whiteColor,
-                              size: 26,
-                            ))
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ! driver is online 
+  // ! driver is online
   Future<void> driverIsOnlineNow() async {
     Position position = await Geolocator.getCurrentPosition();
     driverCurrentPositioned = position;
@@ -332,7 +346,7 @@ class _HomeTapPageState extends State<HomeTapPage> {
     databaseReference.ref.onValue.listen((event) {});
   }
 
-  // ! changedriverlocation 
+  // ! changedriverlocation
   Future<void> changeDriverLiveLocation() async {
     streamSubscription =
         Geolocator.getPositionStream().listen((Position position) {
