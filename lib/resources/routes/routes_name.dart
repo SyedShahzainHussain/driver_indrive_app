@@ -4,4 +4,5 @@ class RouteNames {
   static const signupScreen = "sign_up_screen";
   static const logInScreen = "log_in_screen";
   static const carInfoScreen = "car_info_screen";
+  static const newTripScreen = "new_trip_screen";
 }
