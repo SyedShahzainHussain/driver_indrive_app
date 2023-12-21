@@ -28,9 +28,11 @@ class _MySplashScreenState extends State<MySplashScreen> {
   }
 
   startTimer() {
+    
     firebaseAuth.currentUser != null
         ? AsistantMethod.readCurrentOnlineUserInfo(context)
         : null;
+
     Timer(const Duration(seconds: 3), () async {
       if (firebaseAuth.currentUser != null) {
         currentFirebaseUser = firebaseAuth.currentUser;

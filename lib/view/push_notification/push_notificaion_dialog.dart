@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
+import 'package:uber_clone_app/assistant/asistant_method.dart';
 import 'package:uber_clone_app/model/user_rider_request_model.dart';
 import 'package:uber_clone_app/resources/app_colors.dart';
 import 'package:uber_clone_app/resources/routes/routes_name.dart';
@@ -159,6 +160,8 @@ class _PushNotificationDialogState extends State<PushNotificationDialog> {
             .child(currentFirebaseUser!.uid)
             .child("newRideStatus")
             .set("accepted");
+
+        AsistantMethod.pauseLiveLocation();
         Navigator.pushNamed(context, RouteNames.newTripScreen,
             arguments: widget.userRideRequestModel);
       } else {

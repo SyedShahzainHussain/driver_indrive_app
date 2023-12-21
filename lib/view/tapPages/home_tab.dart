@@ -25,7 +25,6 @@ class _HomeTapPageState extends State<HomeTapPage> {
   final Completer<GoogleMapController> _googleMapController = Completer();
   GoogleMapController? newGoogleMapController;
   LocationPermission? _locationPermission;
-  Position? driverCurrentPositioned;
 
   String? statusText = "Now Offline";
   Color statusColor = Colors.grey;
@@ -151,6 +150,27 @@ class _HomeTapPageState extends State<HomeTapPage> {
   void locateUserPositioned() async {
     Position cPosition = await Geolocator.getCurrentPosition();
     driverCurrentPositioned = cPosition;
+
+    await FirebaseDatabase.instance
+        .ref()
+        .child("drivers")
+        .child(currentFirebaseUser!.uid)
+        .once()
+        .then((value) {
+      if (value.snapshot.value != null) {
+        onlineDrivers.id = (value.snapshot.value as Map)['id'];
+        onlineDrivers.email = (value.snapshot.value as Map)['email'];
+        onlineDrivers.name = (value.snapshot.value as Map)['name'];
+        onlineDrivers.phone = (value.snapshot.value as Map)['phone'];
+        onlineDrivers.car_color =
+            (value.snapshot.value as Map)['car_details']['car_color'];
+        onlineDrivers.car_model =
+            (value.snapshot.value as Map)['car_details']['car_model'];
+        onlineDrivers.car_number =
+            (value.snapshot.value as Map)['car_details']['car_number'];
+      }
+    });
+
     LatLng latLngPositioned = LatLng(
       driverCurrentPositioned!.latitude,
       driverCurrentPositioned!.longitude,
