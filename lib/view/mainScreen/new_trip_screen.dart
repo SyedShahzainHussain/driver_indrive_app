@@ -39,6 +39,11 @@ class _NewTripScreenState extends State<NewTripScreen> {
   String buttonTitle = "Arrived";
   Color buttonColor = Colors.green;
 
+  String rideRequestStatus = "accepted";
+  String durationFromToOriginToDestinations = "";
+
+  bool isRequestDirectionDetails = false;
+
   BitmapDescriptor? iconAnimatedMarker;
   var geoLocater = Geolocator();
 
@@ -87,7 +92,7 @@ class _NewTripScreenState extends State<NewTripScreen> {
               right: 0,
               left: 0,
               child: Container(
-                height: MediaQuery.sizeOf(context).height * .4,
+                height: MediaQuery.sizeOf(context).height * .4, 
                 padding: const EdgeInsets.all(12.0),
                 decoration: const BoxDecoration(
                     color: Colors.black,
@@ -105,9 +110,9 @@ class _NewTripScreenState extends State<NewTripScreen> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      const Text(
-                        "18 mins",
-                        style: TextStyle(
+                      Text(
+                        durationFromToOriginToDestinations,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.lightGreenAccent,
@@ -220,6 +225,41 @@ class _NewTripScreenState extends State<NewTripScreen> {
     );
   }
 
+  // ! gettimeatrealtime
+
+  updateDurationTimeAtRealTime() async {
+    if (isRequestDirectionDetails == false) {
+      isRequestDirectionDetails = true;
+      if (driverLiveCurrentPositioned == null) {
+        return;
+      }
+      var originLatlng = LatLng(
+        driverLiveCurrentPositioned!.latitude,
+        driverLiveCurrentPositioned!.longitude,
+      );
+      var destinationLatlng;
+      if (rideRequestStatus == "accepted") {
+        destinationLatlng =
+            widget.userRideRequestModel!.originLat; // User Pick Up Location
+      } else {
+        destinationLatlng = widget
+            .userRideRequestModel!.destinationLat; // User drop Of Location
+      }
+      var destination =
+          await AsistantMethod.obtainedOriginToDestinationDirectionDetails(
+        originLatlng,
+        destinationLatlng,
+      );
+
+      if (destination != null) {
+        setState(() {
+          durationFromToOriginToDestinations = destination.duration_text!;
+        });
+      }
+      isRequestDirectionDetails = false;
+    }
+  }
+
   // ! draw Polyline
 
   // * step 1 : first driver current position and user pickup position
@@ -230,10 +270,8 @@ class _NewTripScreenState extends State<NewTripScreen> {
     LatLng destinationLatLng,
   ) async {
     var originlatLng = LatLng(originLatLng.latitude, originLatLng.longitude);
-
     var destinationlatLng =
         LatLng(destinationLatLng.latitude, destinationLatLng.longitude);
-
     showDialog(
         context: context,
         builder: (context) => ProgressDialog(
@@ -403,9 +441,10 @@ class _NewTripScreenState extends State<NewTripScreen> {
     }
   }
 
-  // get driverslivelocation
+  // ! get driverslivelocation
 
   getDriverLiveLocation() {
+    var oldLatLng = const LatLng(0, 0);
     streamLiveDriversSubscription =
         Geolocator.getPositionStream().listen((Position position) {
       driverCurrentPositioned = position;
@@ -430,6 +469,20 @@ class _NewTripScreenState extends State<NewTripScreen> {
             (element) => element.markerId.value == "AnimatedMarker");
         setOfMarker.add(animatingMarker);
       });
+      oldLatLng = latLng;
+      updateDurationTimeAtRealTime();
+
+      // * update the drive location
+      Map driverLatLng = {
+        "latitude": driverLiveCurrentPositioned!.latitude,
+        "longitude": driverLiveCurrentPositioned!.longitude,
+      };
+      FirebaseDatabase.instance
+          .ref()
+          .child("All Ride Request")
+          .child(widget.userRideRequestModel!.riderRequestId!)
+          .child("driverLocation")
+          .set(driverLatLng);
     });
   }
 }

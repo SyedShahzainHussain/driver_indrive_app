@@ -29,12 +29,13 @@ class _HomeTapPageState extends State<HomeTapPage> {
   String? statusText = "Now Offline";
   Color statusColor = Colors.grey;
   bool isDriverActive = false;
-
+  Set<Marker> markers = Set<Marker>();
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
+    zoom: 15.4746,
   );
 
+  BitmapDescriptor? iconAnimatedMarker;
   @override
   void initState() {
     super.initState();
@@ -44,6 +45,7 @@ class _HomeTapPageState extends State<HomeTapPage> {
 
   @override
   Widget build(BuildContext context) {
+    createDriverImage();
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -52,6 +54,7 @@ class _HomeTapPageState extends State<HomeTapPage> {
               initialCameraPosition: _kGooglePlex,
               mapType: MapType.normal,
               myLocationEnabled: true,
+              markers: markers,
               onMapCreated: (GoogleMapController googleMapController) {
                 _googleMapController.complete(googleMapController);
                 newGoogleMapController = googleMapController;
@@ -127,14 +130,12 @@ class _HomeTapPageState extends State<HomeTapPage> {
   }
 
   // ! read information from notification
-
+  
   void readCurrentDriverInformation() async {
     PushNotificationSystem pushNotificationSystem = PushNotificationSystem();
     pushNotificationSystem.generateToken();
     pushNotificationSystem.iitilazeCloudMessaging(context);
   }
-
-  // ! black theme map
 
   // ! check  drive location permission if success then get the drive current location
   void checkIfLocationPermissionAllowes() async {
@@ -150,6 +151,19 @@ class _HomeTapPageState extends State<HomeTapPage> {
   void locateUserPositioned() async {
     Position cPosition = await Geolocator.getCurrentPosition();
     driverCurrentPositioned = cPosition;
+
+    markers.removeWhere((element) => element.markerId.value == "usercurrent");
+    markers.add(
+      Marker(
+        markerId: const MarkerId("usercurrent"),
+        position: LatLng(
+          driverCurrentPositioned!.latitude,
+          driverCurrentPositioned!.longitude,
+        ),
+        icon: iconAnimatedMarker!,
+      ),
+    );
+    setState(() {});
 
     await FirebaseDatabase.instance
         .ref()
@@ -177,7 +191,7 @@ class _HomeTapPageState extends State<HomeTapPage> {
     );
 
     newGoogleMapController!.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: latLngPositioned, zoom: 14)));
+        CameraPosition(target: latLngPositioned, zoom: 16)));
     // ignore: use_build_context_synchronously
     await AsistantMethod.searchAddressFromLangitudeandLatitude(
         driverCurrentPositioned!, context);
@@ -204,6 +218,7 @@ class _HomeTapPageState extends State<HomeTapPage> {
   }
 
   // ! changedriverlocation
+
   Future<void> changeDriverLiveLocation() async {
     streamSubscription =
         Geolocator.getPositionStream().listen((Position position) {
@@ -219,6 +234,18 @@ class _HomeTapPageState extends State<HomeTapPage> {
           driverCurrentPositioned!.longitude);
 
       newGoogleMapController!.animateCamera(CameraUpdate.newLatLng(latlng));
+      markers.removeWhere((element) => element.markerId.value == "usercurrent");
+      markers.add(
+        Marker(
+          markerId: const MarkerId("usercurrent"),
+          position: LatLng(
+            driverCurrentPositioned!.latitude,
+            driverCurrentPositioned!.longitude,
+          ),
+          icon: iconAnimatedMarker!
+        ),
+      );
+      setState(() {});
     });
   }
 
@@ -236,4 +263,19 @@ class _HomeTapPageState extends State<HomeTapPage> {
       SystemChannels.platform.invokeMethod("SystemNavigator.pop");
     });
   }
+
+  // ! change driver icon
+  createDriverImage() async {
+    if (iconAnimatedMarker == null) {
+      ImageConfiguration imageConfiguration =
+          createLocalImageConfiguration(context, size: const Size(2, 2));
+
+      BitmapDescriptor.fromAssetImage(
+              imageConfiguration, "assets/image/car.png")
+          .then((value) {
+        iconAnimatedMarker = value;
+      });
+    }
+  }
+
 }
