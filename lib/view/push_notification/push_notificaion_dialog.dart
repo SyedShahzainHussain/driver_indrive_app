@@ -1,6 +1,8 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:uber_clone_app/assistant/asistant_method.dart';
@@ -59,24 +61,6 @@ class _PushNotificationDialogState extends State<PushNotificationDialog> {
                 Row(
                   children: [
                     Image.asset(
-                      "assets/image/destination.png",
-                      width: 16,
-                      height: 16,
-                    ),
-                    const Gap(22),
-                    Expanded(
-                        child: Text(
-                      widget.userRideRequestModel!.destinationAddress!,
-                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                            color: Colors.grey,
-                          ),
-                    ))
-                  ],
-                ),
-                const Gap(20),
-                Row(
-                  children: [
-                    Image.asset(
                       "assets/image/origin.png",
                       width: 16,
                       height: 16,
@@ -89,6 +73,24 @@ class _PushNotificationDialogState extends State<PushNotificationDialog> {
                             color: Colors.grey,
                           ),
                     )),
+                  ],
+                ),
+                const Gap(20),
+                Row(
+                  children: [
+                    Image.asset(
+                      "assets/image/destination.png",
+                      width: 16,
+                      height: 16,
+                    ),
+                    const Gap(22),
+                    Expanded(
+                        child: Text(
+                      widget.userRideRequestModel!.destinationAddress!,
+                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                            color: Colors.grey,
+                          ),
+                    ))
                   ],
                 ),
               ],
@@ -106,7 +108,35 @@ class _PushNotificationDialogState extends State<PushNotificationDialog> {
                     assetAudioPlayer!.pause();
                     assetAudioPlayer!.stop();
                     assetAudioPlayer = AssetsAudioPlayer();
-                    Navigator.pop(context);
+                    FirebaseDatabase.instance
+                        .ref()
+                        .child("All Ride Request")
+                        .child(widget.userRideRequestModel!.riderRequestId!)
+                        .remove()
+                        .then((value) {
+                      FirebaseDatabase.instance
+                          .ref()
+                          .child("drivers")
+                          .child(currentFirebaseUser!.uid)
+                          .child("newRideStatus")
+                          .set("idle")
+                          .then((value) {
+                        FirebaseDatabase.instance
+                            .ref()
+                            .child("drivers")
+                            .child(currentFirebaseUser!.uid)
+                            .child("tripHistory")
+                            .child(widget.userRideRequestModel!.riderRequestId!)
+                            .remove();
+                      }).then((value) {
+                        Fluttertoast.showToast(
+                            msg:
+                                "Ride Request has been Cancelled, Succesfully. Restart App");
+                      });
+                    });
+                    Future.delayed(const Duration(milliseconds: 3000), () {
+                      SystemNavigator.pop();
+                    });
                   },
                   child: Text(
                     "Cancel".toUpperCase(),

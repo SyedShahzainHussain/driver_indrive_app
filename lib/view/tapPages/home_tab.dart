@@ -130,7 +130,7 @@ class _HomeTapPageState extends State<HomeTapPage> {
   }
 
   // ! read information from notification
-  
+
   void readCurrentDriverInformation() async {
     PushNotificationSystem pushNotificationSystem = PushNotificationSystem();
     pushNotificationSystem.generateToken();
@@ -182,6 +182,9 @@ class _HomeTapPageState extends State<HomeTapPage> {
             (value.snapshot.value as Map)['car_details']['car_model'];
         onlineDrivers.car_number =
             (value.snapshot.value as Map)['car_details']['car_number'];
+
+        driverVehicleType =
+            (value.snapshot.value as Map)['car_details']['type'];
       }
     });
 
@@ -237,13 +240,12 @@ class _HomeTapPageState extends State<HomeTapPage> {
       markers.removeWhere((element) => element.markerId.value == "usercurrent");
       markers.add(
         Marker(
-          markerId: const MarkerId("usercurrent"),
-          position: LatLng(
-            driverCurrentPositioned!.latitude,
-            driverCurrentPositioned!.longitude,
-          ),
-          icon: iconAnimatedMarker!
-        ),
+            markerId: const MarkerId("usercurrent"),
+            position: LatLng(
+              driverCurrentPositioned!.latitude,
+              driverCurrentPositioned!.longitude,
+            ),
+            icon: iconAnimatedMarker!),
       );
       setState(() {});
     });
@@ -277,5 +279,4 @@ class _HomeTapPageState extends State<HomeTapPage> {
       });
     }
   }
-
 }

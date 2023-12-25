@@ -65,7 +65,7 @@ class AsistantMethod {
     }
     DistanceInfoModel distanceInfoModel = DistanceInfoModel();
     distanceInfoModel.e_points =
-        response['routes'][0]["overview_polyline"]["points"];
+      response['routes'][0]["overview_polyline"]["points"];
 
     distanceInfoModel.distance_text =
         response['routes'][0]["legs"][0]["distance"]["text"];
@@ -95,5 +95,32 @@ class AsistantMethod {
       driverCurrentPositioned!.latitude,
       driverCurrentPositioned!.longitude,
     );
+  }
+
+// ! calculate the fare amount
+
+  static double calculateFareAmount(DistanceInfoModel distanceInfoModel) {
+    double timeTravaledFareAmoumtPerMinutes =
+        (distanceInfoModel.duration_value! / 10) * 0.1;
+
+    double timeTravaledFareAmoumtPerKilometer =
+        (distanceInfoModel.duration_value! / 1000) * 0.1;
+
+    double totalFare =
+        timeTravaledFareAmoumtPerMinutes + timeTravaledFareAmoumtPerKilometer;
+
+    double localCurrenyFareAmount = totalFare * 278.60;
+
+    if (driverVehicleType == "bikes") {
+      double resultFareAmount = (localCurrenyFareAmount.truncate()) / 2.0;
+      return resultFareAmount;
+    } else if (driverVehicleType == "uber-go") {
+      return localCurrenyFareAmount.truncate().toDouble();
+    } else if (driverVehicleType == "uber-x") {
+      double resultFareAmount = (localCurrenyFareAmount.truncate()) * 2.0;
+      return resultFareAmount;
+    } else {
+      return localCurrenyFareAmount.truncate().toDouble();
+    }
   }
 }
