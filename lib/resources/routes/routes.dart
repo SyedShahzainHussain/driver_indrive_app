@@ -7,6 +7,7 @@ import 'package:uber_clone_app/view/authentication/signUpScreen/sign_up_screen.d
 import 'package:uber_clone_app/view/mainScreen/main_screen.dart';
 import 'package:uber_clone_app/view/mainScreen/new_trip_screen.dart';
 import 'package:uber_clone_app/view/splashScreen/splash_screen.dart';
+import 'package:uber_clone_app/view/trip_history_screen/trip_history_screen.dart';
 
 class Routes {
   static Route<dynamic> generatesRoute(RouteSettings settings) {
@@ -21,9 +22,15 @@ class Routes {
         return MaterialPageRoute(builder: (context) => const CarInfoScreen());
       case RouteNames.logInScreen:
         return MaterialPageRoute(builder: (context) => const LoginScreen());
+      case RouteNames.newTripHistory:
+        return MaterialPageRoute(
+            builder: (context) => const TripHistoryScreen());
       case RouteNames.newTripScreen:
-      final userRideRequestModel= settings.arguments as UserRideRequestModel;
-        return MaterialPageRoute(builder: (context) =>  NewTripScreen(userRideRequestModel:userRideRequestModel ,));
+        final userRideRequestModel = settings.arguments as UserRideRequestModel;
+        return MaterialPageRoute(
+            builder: (context) => NewTripScreen(
+                  userRideRequestModel: userRideRequestModel,
+                ));
       default:
         return MaterialPageRoute(builder: (ctx) {
           return const Scaffold(

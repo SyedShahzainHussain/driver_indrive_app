@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:uber_clone_app/resources/app_colors.dart';
+import 'package:uber_clone_app/view/profile_screen/profilescreen.dart';
+import 'package:uber_clone_app/view/rate_driver_screen/rate_driver_screen.dart';
 import 'package:uber_clone_app/view/tapPages/earning_tab.dart';
 import 'package:uber_clone_app/view/tapPages/home_tab.dart';
-import 'package:uber_clone_app/view/tapPages/profile_tap_page.dart';
-import 'package:uber_clone_app/view/tapPages/rating_tab.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -39,8 +39,8 @@ class _MainScreenState extends State<MainScreen>
         children: const [
           HomeTapPage(),
           EarningTapPage(),
-          RatingtabPage(),
-          ProfileTapPage()
+          RateDriverScreen(),
+          ProfileScreen()
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

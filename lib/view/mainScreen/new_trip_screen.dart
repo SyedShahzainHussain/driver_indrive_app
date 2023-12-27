@@ -285,16 +285,16 @@ class _NewTripScreenState extends State<NewTripScreen> {
       ),
     );
 
-    var currentDriverPositionLatLng = LatLng(
-      driverLiveCurrentPositioned!.latitude,
-      driverLiveCurrentPositioned!.longitude,
-    );
+    // var currentDriverPositionLatLng = LatLng(
+    //   driverLiveCurrentPositioned!.latitude,
+    //   driverLiveCurrentPositioned!.longitude,
+    // );
 
 // * checking if the user reach to the destination and then check the driver current location with user pickup location
     var tripDirectionDetails =
         await AsistantMethod.obtainedOriginToDestinationDirectionDetails(
-      currentDriverPositionLatLng,
       widget.userRideRequestModel!.originLat!,
+      widget.userRideRequestModel!.destinationLat!,
     );
 
     double totalFareAmount =
@@ -329,10 +329,11 @@ class _NewTripScreenState extends State<NewTripScreen> {
     FirebaseDatabase.instance
         .ref()
         .child("drivers")
+        .child(currentFirebaseUser!.uid)
         .child("earning")
         .once()
         .then((value) {
-      // * if earning is alreadu ther im updating the earning
+      // * if earning is already ther im updating the earning
       if (value.snapshot.value != null) {
         var oldtotalAMount = double.parse(value.snapshot.value.toString());
         var totalAmount = totalFareAmount + oldtotalAMount;
@@ -535,8 +536,7 @@ class _NewTripScreenState extends State<NewTripScreen> {
     databaseReference.child("driverName").set(onlineDrivers.name);
     databaseReference.child("driverPhone").set(onlineDrivers.phone);
     databaseReference.child("car_details").set(
-          onlineDrivers.car_model.toString() +
-              onlineDrivers.car_number.toString(),
+          "${onlineDrivers.car_color}  ${onlineDrivers.car_model}  ${onlineDrivers.car_number}",
         );
 
     saveRideRequestIdToDriverHistory();

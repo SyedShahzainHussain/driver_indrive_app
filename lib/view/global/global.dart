@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:uber_clone_app/model/online_drivers.dart';
 import 'package:uber_clone_app/model/user_model.dart';
@@ -15,5 +16,12 @@ StreamSubscription<Position>? streamLiveDriversSubscription;
 AssetsAudioPlayer? assetAudioPlayer = AssetsAudioPlayer();
 Position? driverCurrentPositioned;
 String? driverVehicleType = "";
+ String titleRating = "Good";
+
 
 OnlineDrivers onlineDrivers = OnlineDrivers();
+
+
+  String? statusText = "Now Offline";
+  Color statusColor = Colors.grey;
+  bool isDriverActive = false;

@@ -26,9 +26,6 @@ class _HomeTapPageState extends State<HomeTapPage> {
   GoogleMapController? newGoogleMapController;
   LocationPermission? _locationPermission;
 
-  String? statusText = "Now Offline";
-  Color statusColor = Colors.grey;
-  bool isDriverActive = false;
   Set<Marker> markers = Set<Marker>();
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
@@ -40,7 +37,6 @@ class _HomeTapPageState extends State<HomeTapPage> {
   void initState() {
     super.initState();
     checkIfLocationPermissionAllowes();
-    readCurrentDriverInformation();
   }
 
   @override
@@ -129,14 +125,6 @@ class _HomeTapPageState extends State<HomeTapPage> {
     );
   }
 
-  // ! read information from notification
-
-  void readCurrentDriverInformation() async {
-    PushNotificationSystem pushNotificationSystem = PushNotificationSystem();
-    pushNotificationSystem.generateToken();
-    pushNotificationSystem.iitilazeCloudMessaging(context);
-  }
-
   // ! check  drive location permission if success then get the drive current location
   void checkIfLocationPermissionAllowes() async {
     _locationPermission = await Geolocator.requestPermission();
@@ -198,6 +186,13 @@ class _HomeTapPageState extends State<HomeTapPage> {
     // ignore: use_build_context_synchronously
     await AsistantMethod.searchAddressFromLangitudeandLatitude(
         driverCurrentPositioned!, context);
+    PushNotificationSystem pushNotificationSystem = PushNotificationSystem();
+    pushNotificationSystem.iitilazeCloudMessaging(context);
+    pushNotificationSystem.generateToken();
+
+    AsistantMethod.readDriverEarning(context);
+    AsistantMethod.readDriverRating(context);
+
   }
 
   // ! driver is online
